@@ -24,10 +24,11 @@
 # Hamurabi in Python
 
 import random
+import os
 
-population = 95
+population = 100
 starved = 0
-migrated = 5
+migrated = 0
 bushels = 2800
 acres = 1000
 byield = 3
@@ -57,6 +58,8 @@ class Exitloop(Exception): pass  #for immediate breaking from nested loops
 #		acres += x
 #		return TRUE
 ###################################################################################################################
+
+os.system('clear') # clear screen
 
 for year in [1,2,3,4,5,6,7,8,9,10]:
 	died = 0 #no one has died so far this year
@@ -149,19 +152,52 @@ for year in [1,2,3,4,5,6,7,8,9,10]:
 	except Exitloop:
 		pass
 	
-	starved = abs(fed - int(population))
+	starved = population - fed
 	if starved < 0:
 		starved = 0
-	#print str(population) + '\n'
-	births = int(population / 2)
+	if starved > int((0.45 * population)):
+		print "You starved starved " + str(starved) + "out of a population of only " + str(population) + ","
+		print "this has caused you to be deposed by force!"
+		break	#end game due to starvation
+	totaldied += starved #incrememt total number of deaths
+	avgstarved += int((float(starved)/float(population))*100)
+	print "### Starved: " + str(starved) ###debug
+	print "### Population: " + str(population) ###debug
+	births = int(population / random.randint(2, 10))
+	print "### Births: " + str(births) ####debug
 	population += births
 	population -= starved #children can die
-#	x = int(population)
-#	print str(population) + '\n'
+	print "### Population: " + str(population) ###debug
 	migrated =  int(0.1 * random.randint(1, population))
+	print "### Migrated: " + str(migrated) ###debug
 	population += migrated #but immigrants don't
 	byield = random.randint(1, 10)
-	pests = int(bushels / random.randint(0, 5))+2
+	tradeval = 17+random.randint(0, 10)
+	pests = int(bushels / random.randint(1, 5))+2
 	bushels += planted * byield
 	bushels -= pests
+	print "### Totaldied: " + str(totaldied) ###debug
+	print "### Avgstarved: " + str(avgstarved) ###debug
 	print "\n\n"
+	#end for loop
+
+print "###Final avgstarved: " + str(avgstarved) ###debug
+print "In your 10-year term of office " + str(avgstarved) + " percent of"
+print "population starved per year on average.  A total"
+print "of " + str(totaldied) + " people died during your term."
+print "The city began with 10 acres per person and ended with"
+print str(acres/population) + " acres per person."
+if avgstarved > 33:
+	print "Due to this extreme mismanagement you have no only"
+	print "been impeached and thrown out of office, but you have"
+	print "also been declared 'National Fink'!!\n"
+elif avgstarved > 10:
+	print "Your heavy handed performance smacks of Nero and Ivan IV."
+	print "The people remaining find you an unpleasant ruler, and"
+	print "frankly, hate your guts!\n"
+else:
+	print "Your performance could have been somewhat better, but"
+	print "really wasn't too bad at all."
+	print random.randint(population) + "would dearly like to see"
+	print "you assassinated, but we all have our trivial problems.\n"
+print "<<-----------<END>----------->>"
