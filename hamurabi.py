@@ -158,7 +158,7 @@ for year in [1,2,3,4,5,6,7,8,9,10]:
 	starved = population - fed
 	if starved < 0:
 		starved = 0
-	if starved > int((0.45 * population)):
+	if starved > int(0.45 * population):
 		print "You starved starved " + str(starved) + " out of a population of only " + str(population) + ","
 		print "this has caused you to be deposed by force!"
 		break	#end game due to starvation
@@ -185,7 +185,7 @@ for year in [1,2,3,4,5,6,7,8,9,10]:
 	#end for loop
 
 print "###Final avgstarved: " + str(avgstarved) ###debug
-print "In your " + year + "year term of office " + str(avgstarved/10) + " percent of"
+print "In your " + year + "year term of office " + str(int(avgstarved/10)) + " percent of"
 print "population starved per year on average.  A total"
 print "of " + str(totaldied) + " people died during your term."
 print "The city began with 10 acres per person and ended with"
