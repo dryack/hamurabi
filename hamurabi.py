@@ -185,7 +185,7 @@ for year in [1,2,3,4,5,6,7,8,9,10]:
 	#end for loop
 
 print "###Final avgstarved: " + str(avgstarved) ###debug
-print "In your " + year + "year term of office " + str(int(avgstarved/10)) + " percent of"
+print "In your " + int(year) + "year term of office " + str(int(avgstarved/10)) + " percent of"
 print "population starved per year on average.  A total"
 print "of " + str(totaldied) + " people died during your term."
 print "The city began with 10 acres per person and ended with"
