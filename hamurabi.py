@@ -146,7 +146,7 @@ for year in [1,2,3,4,5,6,7,8,9,10]:
 					print "Think again Hamurabi, you only have " + str(population) + " to plant the fields!"
 					continue
 				elif int(inp) > acres:
-					print "Think again Hamurabi, you only have " +str(acres) + " available!"
+					print "Think again Hamurabi, you only have " + str(acres) + " available!"
 					continue
 				else:
 					bushels -= int(inp)
@@ -185,7 +185,7 @@ for year in [1,2,3,4,5,6,7,8,9,10]:
 	#end for loop
 
 print "###Final avgstarved: " + str(avgstarved) ###debug
-print "In your 10-year term of office " + str(avgstarved) + " percent of"
+print "In your 10-year term of office " + str(avgstarved)/10 + " percent of"
 print "population starved per year on average.  A total"
 print "of " + str(totaldied) + " people died during your term."
 print "The city began with 10 acres per person and ended with"
