@@ -145,6 +145,9 @@ for year in [1,2,3,4,5,6,7,8,9,10]:
 				elif int(inp) > population * 10: # people can only plant 10 acres each
 					print "Think again Hamurabi, you only have " + str(population) + " to plant the fields!"
 					continue
+				elif int(inp) > acres:
+					print "Think again Hamurabi, you only have " +str(acres) + " available!"
+					continue
 				else:
 					bushels -= int(inp)
 					planted = int(inp)
