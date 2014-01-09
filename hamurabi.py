@@ -30,7 +30,7 @@ import sys
 class CityState():
 	def __init__(self, turns):
 		self.turns_tp = turns
-		self.year = 1
+		self.year = 0
 		self.population = 100
 		self.starved = 0
 		self.migrated = 0
@@ -47,16 +47,16 @@ class CityState():
 		self.print_year_end()
 		
 	def check_for_plague(self):
-		if (self.year > 1) and (random.randint(0,15) == 0):  #check for plague
+		if (self.year > 0) and (random.randint(0,15) == 0):  #check for plague
 			print "A horrible plague has struck!  Many have died!"
 			self.died = self.population/(random.randint(0,4)+2) #calculate losses
 			self.population -= self.died
 			self.totaldied += self.died
 	
 	def print_year_end(self):
-		if self.year > 1:
+		if self.year > 0:
 			self.do_numbers()
-			
+		
 		#set this year's tradevalue
 		self.tradeval = 17+random.randint(0, 10)
 		print "\nMy lord in the year " + str(self.year) + " I beg to report to you that"
@@ -95,11 +95,7 @@ class CityState():
 		
 		
 	def feed_people(self):
-		#will be used as follows:
-		#tmp = False
-		#while tmp == False:
-		#	CityState.feedpeople()
-		
+				
 		print "This year you will require " + str(self.population*20) + " bushels to avoid starving anyone."
 		inp = raw_input('How many bushels do you wish to release to your people? => ')
 		if inp == "":
@@ -140,8 +136,9 @@ class CityState():
 			
 	def check_for_overthrow(self):
 		if self.starved > int(0.45 * self.population):
-			print "You starved starved " + str(self.starved) + " out of a population of only " + str(self.population) + ","
+			print "\nYou starved starved " + str(self.starved) + " out of a population of only " + str(self.population) + ","
 			print "this has caused you to be deposed by force!\n"
+			self.totaldied += self.starved
 			self.print_end_reign()
 			sys.exit(0)   #end game due to starvation
 					
@@ -155,6 +152,7 @@ class CityState():
 		self.births = int(self.population / random.randint(2, 10))
 	
 		self.population += self.births
+		self.check_for_overthrow()
 		self.population -= self.starved #children can die
 	
 		self.migrated =  int(0.1 * random.randint(1, self.population))
@@ -163,20 +161,20 @@ class CityState():
 		
 		self.pests = int(self.bushels / random.randint(1, 5))+2
 		self.bushels += self.planted * self.byield
-		self.pests = int(self.bushels / random.randint(1, 5))+2
 		self.bushels -= self.pests
 		if self.bushels < 0:
 			self.bushels = 0
-	
+		self.totaldied += self.starved
+		
 	def print_end_reign(self):
-		print "In your " + str(self.year) + "year term of office " + str(int(self.avg_starved/10)) + " percent of"
+		print "In your " + str(self.year) + " year term of office " + str(int(self.avg_starved/self.year)) + " percent of"
 		print "population starved per year on average.  A total"
 		print "of " + str(self.totaldied) + " people died during your term."
 		print "The city began with 10 acres per person and ended with"
 		print str(self.acres/self.population) + " acres per person."
 		
 		if self.avg_starved > 33:
-			print "Due to this extreme mismanagement you have no only"
+			print "Due to this extreme mismanagement you have not only"
 			print "been impeached and thrown out of office, but you have"
 			print "also been declared 'National Fink'!!\n"
 		elif self.avg_starved > 10:
@@ -186,7 +184,7 @@ class CityState():
 		else:
 			print "Your performance could have been somewhat better, but"
 			print "really wasn't too bad at all."
-			print random.randint(self.population) + "would dearly like to see"
+			print str(random.randint(1, self.population)) + " would dearly like to see"
 			print "you assassinated, but we all have our trivial problems.\n"
 			
 		print "<<-----------<END>----------->>"
