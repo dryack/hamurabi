@@ -25,182 +25,199 @@
 
 import random
 import os
+import sys
 
-population = 100
-starved = 0
-migrated = 0
-bushels = 2800
-acres = 1000
-byield = 3
-pests = 200
-tradeval = 17+random.randint(0, 10) #randomly set between 17 and 27 at the beginning of each game
-avgstarved = 0
-totaldied = 0 #incremented by all deaths due to any cause
-fed = 0
-planted = 0
-
-class Exitloop(Exception): pass  #for immediate breaking from nested loops
-
-##################################################################################################################
-#####	For later consideration... improving flexibility 
-###################################################################################################################
-#def rats(x): # takes bushels
-#	return x/(random.randomint(0, 5)+2)
-
-#def births(x): #takes population
-
-#def buyAcres(x): #takes amount player is attempting to purchase
-#	if (x*tradeval) > bushels:
-#		short = abs((bushels-(x*tradeval)))
-#		print "My lord, you are short " + short + " bushels for purchasing that land!"
-#		return FALSE
-#	else:
-#		acres += x
-#		return TRUE
-###################################################################################################################
-
-os.system('clear') # clear screen
-
-for year in [1,2,3,4,5,6,7,8,9,10]:
-	died = 0 #no one has died so far this year
-	print "\nMy lord in the year " + str(year) + " I beg to report to you that"
-	print str(starved) + " people starved, and " + str(migrated) + " came to the city."
-	if (year != 1) and (random.randint(0,15) == 0):  #check for plague
-		print "A horrible plague has struck!  Many have died!"
-		died = population/(random.randint(0,4)+2) #calculate losses
-		population -= died
-		totaldied += died
-
-	print "Population is now " + str(population) + "."
-	print "The city now owns " + str(acres) + " acres of land."
-	print "You have harvested " + str(byield) + " bushels per acre."
-	print "Rats ate " + str(pests) + " bushels of grain."
-	print "We now have " + str(bushels) + " in store."
-	print "Land is trading at " + str(tradeval) + " bushels per acre.\n"
+class CityState():
+	def __init__(self, turns):
+		self.turns_tp = turns
+		self.year = 1
+		self.population = 100
+		self.starved = 0
+		self.migrated = 0
+		self.bushels = 2800
+		self.acres = 1000
+		self.byield = 3
+		self.pests = 200
+		self.tradeval =  0
+		self.avg_starved = 0
+		self.totaldied = 0
+		self.fed = 100
+		self.planted = 0
+		self.died = 0
+		self.print_year_end()
+		
+	def check_for_plague(self):
+		if (self.year > 1) and (random.randint(0,15) == 0):  #check for plague
+			print "A horrible plague has struck!  Many have died!"
+			self.died = self.population/(random.randint(0,4)+2) #calculate losses
+			self.population -= self.died
+			self.totaldied += self.died
 	
-	try:	#really just using the try block to allow breaking from nested loops
-		while 1:
-			inp = raw_input('How many acres do you wish to buy? => ')
-			if (inp == "") or (int(inp) == 0):  #player doesn't want to buy
-				while 1:
-					inp = raw_input('How many acres do you wish to sell => ')
-					if (inp == "") or (int(inp) == 0):
-						raise Exitloop
-					elif int(inp) < 0:  #player is crazy... placeholding for more interesting behavior
-						print"\nHamurabi, you have gone mad!"
-						raise Exitloop
-					else:
-						if int(inp) > acres:
-							print "Think again Hamurabi, you only have " + str(acres) + " acres to sell!"
-							continue  #tried to sell more than currently owned
-						else:
-							acres -= int(inp)	#reduce acres by number sold
-							bushels += int(inp)*tradeval	#increase bushels based on number acres sold
-							raise Exitloop
-			elif int(inp) < 0:
-                                print "\nHamurabi, you have gone mad!"	#player is crazy... placeholding for more interesting behavior
-                                raise Exitloop
-
-			else:
-				if int(inp)*tradeval > bushels:
-					print "Think again Hamurabi, you only have " + str(bushels) + " bushels to use for purchase!"
-					continue	#tried to buy more than can be afforded
-				else:
-					acres += int(inp)	#increase acres by num purchased
-					bushels -= int(inp)*tradeval	#reduce bushels based on purchased acres
-					raise Exitloop
-	except Exitloop:
-		pass
-	try:
-		while 1:
-			print "This year you will require " + str(population*20) + " bushels to avoid starving anyone."
-			inp = raw_input('How many bushels do you wish to release to your people? => ')
-			if inp == "":
-				continue #player didn't enter anything
-			elif int(inp) < 0:
-				print "Hamurabi, you have gone mad!"
-				raise Exitloop
-			else:
-				if int(inp) > bushels:
-					print "Think again Hamurabi, you only have " + str(bushels) + " available!"
-					continue
-				else:
-					bushels -= int(inp)
-					fed = int(inp)/20
-					raise Exitloop
-	except Exitloop:
-		pass
-	try:
-		while 1:
-			inp = raw_input('How many fields will you plant => ')
-			if inp == "":
-				continue #player didn't enter anything
-			elif int(inp) < 0:
-				print "Hamurabi, you have gone mad!"
-				raise Exitloop
-			else:
-				if int(inp) > bushels:
-					print "Think again Hamurabi, you only have " + str(bushels) + " bushels available!"
-					continue
-				elif int(inp) > population * 10: # people can only plant 10 acres each
-					print "Think again Hamurabi, you only have " + str(population) + " people to plant the fields!"
-					continue
-				elif int(inp) > acres:
-					print "Think again Hamurabi, you only have " + str(acres) + " acres available!"
-					continue
-				else:
-					bushels -= int(inp)
-					planted = int(inp)
-					raise Exitloop
-	except Exitloop:
-		pass
+	def print_year_end(self):
+		if self.year > 1:
+			self.do_numbers()
+			
+		#set this year's tradevalue
+		self.tradeval = 17+random.randint(0, 10)
+		print "\nMy lord in the year " + str(self.year) + " I beg to report to you that"
+		print str(self.starved) + " people starved, and " + str(self.migrated) + " came to the city."
+		self.check_for_plague()
+		print "Population is now " + str(self.population) + "."
+		print "The city now owns " + str(self.acres) + " acres of land."
+		print "You have harvested " + str(self.byield) + " bushels per acre."
+		print "Rats ate " + str(self.pests) + " bushels of grain."
+		print "We now have " + str(self.bushels) + " in store."
+		print "Land is trading at " + str(self.tradeval) + " bushels per acre.\n"
+		self.year += 1
 	
-	starved = population - fed
-	if starved < 0:
-		starved = 0
-	if starved > int(0.45 * population):
-		print "You starved starved " + str(starved) + " out of a population of only " + str(population) + ","
-		print "this has caused you to be deposed by force!"
-		break	#end game due to starvation
-	totaldied += starved #incrememt total number of deaths
-	avgstarved += int((float(starved)/float(population))*100)
-	print "### Starved: " + str(starved) ###debug
-	print "### Population: " + str(population) ###debug
-	births = int(population / random.randint(2, 10))
-	print "### Births: " + str(births) ####debug
-	population += births
-	population -= starved #children can die
-	print "### Population: " + str(population) ###debug
-	migrated =  int(0.1 * random.randint(1, population))
-	print "### Migrated: " + str(migrated) ###debug
-	population += migrated #but immigrants don't
-	byield = random.randint(1, 10)
-	tradeval = 17+random.randint(0, 10)
-	pests = int(bushels / random.randint(1, 5))+2
-	bushels += planted * byield
-	bushels -= pests
-	print "### Totaldied: " + str(totaldied) ###debug
-	print "### Avgstarved: " + str(avgstarved) ###debug
-	print "\n\n"
-	#end for loop
+	def get_acres(self):
+		inp = raw_input('How many acres do you wish to buy? => ')
+		if (inp == "") or (int(inp) == 0):	#player doesn't want to buy
+			inp = raw_input('How many acres do you wish to sell => ')
+			if (inp == "") or (int(inp) == 0):
+				return True	#neither buying nor selling
+			else:
+				if int(inp) > self.acres:
+					print "Think again Hamurabi, you only have " + str(self.acres) + " acres to sell!"
+					return False  #tried to sell more than currently owned
+				else:
+					self.acres -= int(inp)       #reduce acres by number sold
+					self.bushels += int(inp)*self.tradeval    #increase bushels based on number acres sold
+					return True
+		else:
+			if int(inp)*self.tradeval > self.bushels:
+				print "Think again Hamurabi, you only have " + str(bushels) + " bushels to use for purchase!"
+				return False	#tried to buy more than can be afforded
+			else:
+				self.acres += int(inp)       #increase acres by num purchased
+				self.bushels -= int(inp)*self.tradeval    #reduce bushels based on purchased acres
+				return True
+		
+		
+	def feed_people(self):
+		#will be used as follows:
+		#tmp = False
+		#while tmp == False:
+		#	CityState.feedpeople()
+		
+		print "This year you will require " + str(self.population*20) + " bushels to avoid starving anyone."
+		inp = raw_input('How many bushels do you wish to release to your people? => ')
+		if inp == "":
+			return False #player didn't enter anything
+		elif int(inp) < 0:
+			print "Hamurabi, you have gone mad!"
+			return False
+		else:
+			if int(inp) > self.bushels:
+				print "Think again Hamurabi, you only have " + str(self.bushels) + " available!"
+				return False
+			else:
+				self.bushels -= int(inp)
+				self.fed = int(inp)/20
+				return True
+			
+	def plant_fields(self):
+		inp = raw_input('How many fields will you plant => ')
+		if inp == "":
+			return False	#player didn't enter anything
+		elif int(inp) < 0:
+			print "Hamurabi, you have gone mad!"
+			return False
+		else:
+			if int(inp) > self.bushels:
+				print "Think again Hamurabi, you only have " + str(self.bushels) + " bushels available!"
+				return False
+			elif int(inp) > self.population * 10: # people can only plant 10 acres each
+				print "Think again Hamurabi, you only have " + str(self.population) + " people to plant the fields!"
+				return False
+			elif int(inp) > self.acres:
+				print "Think again Hamurabi, you only have " + str(self.acres) + " acres available!"
+				return False
+			else:
+				self.bushels -= int(inp)
+				self.planted = int(inp)
+				return True
+			
+	def check_for_overthrow(self):
+		if self.starved > int(0.45 * self.population):
+			print "You starved starved " + str(self.starved) + " out of a population of only " + str(self.population) + ","
+			print "this has caused you to be deposed by force!\n"
+			self.print_end_reign()
+			sys.exit(0)   #end game due to starvation
+					
+	def do_numbers(self):
+		self.starved = self.population - self.fed
+		if self.starved < 0:
+			self.starved = 0
+		self.avg_starved += int((float(self.starved)/float(self.population))*100)
+		self.byield = random.randint(1, 10)
+		
+		self.births = int(self.population / random.randint(2, 10))
+	
+		self.population += self.births
+		self.population -= self.starved #children can die
+	
+		self.migrated =  int(0.1 * random.randint(1, self.population))
+	
+		self.population += self.migrated #but immigrants don't
+		
+		self.pests = int(self.bushels / random.randint(1, 5))+2
+		self.bushels += self.planted * self.byield
+		self.pests = int(self.bushels / random.randint(1, 5))+2
+		self.bushels -= self.pests
+		if self.bushels < 0:
+			self.bushels = 0
+	
+	def print_end_reign(self):
+		print "In your " + str(self.year) + "year term of office " + str(int(self.avg_starved/10)) + " percent of"
+		print "population starved per year on average.  A total"
+		print "of " + str(self.totaldied) + " people died during your term."
+		print "The city began with 10 acres per person and ended with"
+		print str(self.acres/self.population) + " acres per person."
+		
+		if self.avg_starved > 33:
+			print "Due to this extreme mismanagement you have no only"
+			print "been impeached and thrown out of office, but you have"
+			print "also been declared 'National Fink'!!\n"
+		elif self.avg_starved > 10:
+			print "Your heavy handed performance smacks of Nero and Ivan IV."
+			print "The people remaining find you an unpleasant ruler, and"
+			print "frankly, hate your guts!\n"
+		else:
+			print "Your performance could have been somewhat better, but"
+			print "really wasn't too bad at all."
+			print random.randint(self.population) + "would dearly like to see"
+			print "you assassinated, but we all have our trivial problems.\n"
+			
+		print "<<-----------<END>----------->>"
+	
 
-print "###Final avgstarved: " + str(avgstarved) ###debug
-print "In your " + int(year) + "year term of office " + str(int(avgstarved/10)) + " percent of"
-print "population starved per year on average.  A total"
-print "of " + str(totaldied) + " people died during your term."
-print "The city began with 10 acres per person and ended with"
-print str(acres/population) + " acres per person."
-if avgstarved > 33:
-	print "Due to this extreme mismanagement you have no only"
-	print "been impeached and thrown out of office, but you have"
-	print "also been declared 'National Fink'!!\n"
-elif avgstarved > 10:
-	print "Your heavy handed performance smacks of Nero and Ivan IV."
-	print "The people remaining find you an unpleasant ruler, and"
-	print "frankly, hate your guts!\n"
-else:
-	print "Your performance could have been somewhat better, but"
-	print "really wasn't too bad at all."
-	print random.randint(population) + "would dearly like to see"
-	print "you assassinated, but we all have our trivial problems.\n"
-print "<<-----------<END>----------->>"
+def main():
+	os.system('clear')	#clear screen
+	
+	gameturns = raw_input('How many years would you like to play? => ')
+	if (gameturns == '') or (int(gameturns) <= 0):
+		gameturns = 10
+	sumer = CityState(int(gameturns))
+	
+	while int(gameturns) > 0:
+		
+		tmp = False
+		while tmp == False:
+			tmp = sumer.get_acres()
+	
+		tmp = False
+		while tmp == False:
+			tmp = sumer.feed_people()
+		
+		tmp = False
+		while tmp == False:
+			tmp = sumer.plant_fields()
+			
+		gameturns = int(gameturns) - 1
+		sumer.print_year_end()
+		
+	sumer.print_end_reign()
+
+if __name__ == "__main__":
+    main()
