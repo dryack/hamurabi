@@ -27,6 +27,19 @@ import random
 import os
 import sys
 
+
+#since all player input in the game should either be a \r or a positive number
+#this function wraps raw_input and only returns a value if the input
+#meets the above criteria.
+#otherwise it will print a brief message and call itself again
+def get_input(prompt):
+	input = raw_input(prompt)
+	if ((input.isdigit() == True) and (int(input) >= 0)) or (input == ""):
+		return input
+	else:
+		print "Try again Hamurabi!"
+		return get_input(prompt)
+
 class CityState():
 	def __init__(self, turns):
 		self.turns_tp = turns
@@ -70,10 +83,20 @@ class CityState():
 		print "Land is trading at " + str(self.tradeval) + " bushels per acre.\n"
 		self.year += 1
 	
-	def get_acres(self):
-		inp = raw_input('How many acres do you wish to buy? => ')
+	def get_acres(self, *test):
+		
+		if test:
+			inp = test
+		else:
+			inp = get_input('How many acres do you wish to buy? => ')
+			
 		if (inp == "") or (int(inp) == 0):	#player doesn't want to buy
-			inp = raw_input('How many acres do you wish to sell => ')
+		
+			if test:
+				inp = test
+			else:
+				inp = get_input('How many acres do you wish to sell => ')
+		
 			if (inp == "") or (int(inp) == 0):
 				return True	#neither buying nor selling
 			else:
@@ -97,12 +120,9 @@ class CityState():
 	def feed_people(self):
 				
 		print "This year you will require " + str(self.population*20) + " bushels to avoid starving anyone."
-		inp = raw_input('How many bushels do you wish to release to your people? => ')
+		inp = get_input('How many bushels do you wish to release to your people? => ')
 		if inp == "":
 			return False #player didn't enter anything
-		elif int(inp) < 0:
-			print "Hamurabi, you have gone mad!"
-			return False
 		else:
 			if int(inp) > self.bushels:
 				print "Think again Hamurabi, you only have " + str(self.bushels) + " available!"
@@ -113,12 +133,9 @@ class CityState():
 				return True
 			
 	def plant_fields(self):
-		inp = raw_input('How many fields will you plant => ')
+		inp = get_input('How many fields will you plant => ')
 		if inp == "":
 			return False	#player didn't enter anything
-		elif int(inp) < 0:
-			print "Hamurabi, you have gone mad!"
-			return False
 		else:
 			if int(inp) > self.bushels:
 				print "Think again Hamurabi, you only have " + str(self.bushels) + " bushels available!"
@@ -127,7 +144,7 @@ class CityState():
 				print "Think again Hamurabi, you only have " + str(self.population) + " people to plant the fields!"
 				return False
 			elif int(inp) > self.acres:
-				print "Think again Hamurabi, you only have " + str(self.acres) + " acres available!"
+				print "Think again Hamurabi, you only have " + str(self.acres) + " acres to plant!"
 				return False
 			else:
 				self.bushels -= int(inp)
@@ -143,20 +160,18 @@ class CityState():
 			sys.exit(0)   #end game due to starvation
 					
 	def do_numbers(self):
+		self.byield = random.randint(1, 10)	#set bushel yield per acre for the year
+		
 		self.starved = self.population - self.fed
 		if self.starved < 0:
 			self.starved = 0
 		self.avg_starved += int((float(self.starved)/float(self.population))*100)
-		self.byield = random.randint(1, 10)
-		
-		self.births = int(self.population / random.randint(2, 10))
-	
+		self.births = int(self.population / random.randint(2, 10))	
 		self.population += self.births
 		self.check_for_overthrow()
+		self.avg_starved += int((float(self.starved)/float(self.population))*100)
 		self.population -= self.starved #children can die
-	
 		self.migrated =  int(0.1 * random.randint(1, self.population))
-	
 		self.population += self.migrated #but immigrants don't
 		
 		self.pests = int(self.bushels / random.randint(1, 5)+2)
@@ -164,6 +179,7 @@ class CityState():
 		self.bushels -= self.pests
 		if self.bushels < 0:
 			self.bushels = 0
+		
 		self.totaldied += self.starved
 		
 	def print_end_reign(self):
@@ -173,19 +189,20 @@ class CityState():
 		print "The city began with 10 acres per person and ended with"
 		print str(self.acres/self.population) + " acres per person."
 		
-		if self.avg_starved > 33:
+		if int(self.avg_starved / self.year) > 33:
 			print "Due to this extreme mismanagement you have not only"
 			print "been impeached and thrown out of office, but you have"
 			print "also been declared 'National Fink'!!\n"
-		elif self.avg_starved > 10:
+		
+		elif int(self.avg_starved / self.year) > 10:
 			print "Your heavy handed performance smacks of Nero and Ivan IV."
 			print "The people remaining find you an unpleasant ruler, and"
 			print "frankly, hate your guts!\n"
 		else:
 			print "Your performance could have been somewhat better, but"
 			print "really wasn't too bad at all."
-			print str(random.randint(1, self.population)) + " would dearly like to see"
-			print "you assassinated, but we all have our trivial problems.\n"
+			print str(random.randint(1, self.population)) + " people would dearly like to see you assassinated,"
+			print "but we all have our trivial problems.\n"
 			
 		print "<<-----------<END>----------->>"
 	
@@ -193,7 +210,7 @@ class CityState():
 def main():
 	os.system('clear')	#clear screen
 	
-	gameturns = raw_input('How many years would you like to play? => ')
+	gameturns = get_input('How many years would you like to play? => ')
 	if (gameturns == '') or (int(gameturns) <= 0):
 		gameturns = 10
 	sumer = CityState(int(gameturns))
