@@ -159,7 +159,7 @@ class CityState():
 	
 		self.population += self.migrated #but immigrants don't
 		
-		self.pests = int(self.bushels / random.randint(1, 5))+2
+		self.pests = int(self.bushels / random.randint(1, 5)+2)
 		self.bushels += self.planted * self.byield
 		self.bushels -= self.pests
 		if self.bushels < 0:
