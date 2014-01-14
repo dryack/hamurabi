@@ -65,7 +65,7 @@ def test_get_input(prompt):
                 if frame_s == '["                        inp = get_input(\'How many acres do you wish to sell => \')\n"]':
                     if bush <= (pop * 11) + acre:
                         return str(acre / 7)
-                    if bush <= (pop * 8) + acre:
+                    elif bush <= (pop * 8) + acre:
                         return str(acre / 5)
                     elif (acre / pop) > 15:
                         return str(acre / 10)
