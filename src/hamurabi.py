@@ -26,6 +26,10 @@
 import random
 import os
 import sys
+import inspect
+
+list_of_replies = ['20', '0', '0', '1800', '1000', '25', '1800', '1025', '25',
+		   '2000', '1050', '25', '2060', '1075']
 
 
 #since all player input in the game should either be a \r or a positive number
@@ -33,12 +37,32 @@ import sys
 #meets the above criteria.
 #otherwise it will print a brief message and call itself again
 def get_input(prompt):
+	#tmp = inspect.trace()[-1][0].f_locals[0]
+	frame = inspect.stack()[2][0]
+	
+	print '##################################################'
+	try:
+		print frame.f_locals['sumer']
+	except:
+		print 'Ooops!'
+	print '##################################################'
 	input = raw_input(prompt)
 	if ((input.isdigit() == True) and (int(input) >= 0)) or (input == ""):
+		
 		return input
 	else:
 		print "Try again Hamurabi!"
 		return get_input(prompt)
+
+def test_get_input(prompt):
+	print prompt
+	print '##################################################'
+	print inspect.trace()[-1]
+	print '##################################################'
+	if list_of_replies.__len__() == 0:
+		return str(random.randint(1,10000))
+	else:
+		return list_of_replies.pop(0)
 
 class CityState():
 	def __init__(self, turns):
@@ -58,7 +82,7 @@ class CityState():
 		self.planted = 0
 		self.died = 0
 		self.print_year_end()
-		
+	
 	def check_for_plague(self):
 		if (self.year > 0) and (random.randint(0,15) == 0):  #check for plague
 			print "A horrible plague has struck!  Many have died!"
@@ -83,20 +107,12 @@ class CityState():
 		print "Land is trading at " + str(self.tradeval) + " bushels per acre.\n"
 		self.year += 1
 	
-	def get_acres(self, *test):
+	def get_acres(self):
+		#get_input =test_get_input	
 		
-		if test:
-			inp = test
-		else:
-			inp = get_input('How many acres do you wish to buy? => ')
-			
-		if (inp == "") or (int(inp) == 0):	#player doesn't want to buy
-		
-			if test:
-				inp = test
-			else:
-				inp = get_input('How many acres do you wish to sell => ')
-		
+		inp = get_input('How many acres do you wish to buy => ')			
+		if (inp == "") or (int(inp) == 0):	#player doesn't want to buy		
+			inp = get_input('How many acres do you wish to sell => ')
 			if (inp == "") or (int(inp) == 0):
 				return True	#neither buying nor selling
 			else:
@@ -109,7 +125,7 @@ class CityState():
 					return True
 		else:
 			if int(inp)*self.tradeval > self.bushels:
-				print "Think again Hamurabi, you only have " + str(bushels) + " bushels to use for purchase!"
+				print "Think again Hamurabi, you only have " + str(self.bushels) + " bushels to use for purchase!"
 				return False	#tried to buy more than can be afforded
 			else:
 				self.acres += int(inp)       #increase acres by num purchased
@@ -118,7 +134,8 @@ class CityState():
 		
 		
 	def feed_people(self):
-				
+		#get_input =test_get_input
+		
 		print "This year you will require " + str(self.population*20) + " bushels to avoid starving anyone."
 		inp = get_input('How many bushels do you wish to release to your people? => ')
 		if inp == "":
@@ -133,6 +150,8 @@ class CityState():
 				return True
 			
 	def plant_fields(self):
+		#get_input =test_get_input
+		
 		inp = get_input('How many fields will you plant => ')
 		if inp == "":
 			return False	#player didn't enter anything
@@ -209,6 +228,8 @@ class CityState():
 
 def main():
 	os.system('clear')	#clear screen
+	
+	#get_input =test_get_input
 	
 	gameturns = get_input('How many years would you like to play? => ')
 	if (gameturns == '') or (int(gameturns) <= 0):
