@@ -34,15 +34,6 @@ import inspect
 #meets the above criteria.
 #otherwise it will print a brief message and call itself again
 def get_input(prompt):
-        
-        framec = inspect.stack()[1][3]
-        print '##################################################'
-        try:
-                #print framev.f_locals['sumer'].bushels
-                print framec
-        except:
-                print 'Ooops!'
-        print '##################################################'
         input = raw_input(prompt)
         if ((input.isdigit() == True) and (int(input) >= 0)) or (input == ""):
                 return input
